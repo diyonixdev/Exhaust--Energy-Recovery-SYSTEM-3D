@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { SIMULATION_PHASES } from "../data/simulationPhases";
+import { getParentComponentId } from "../data/editableComponents";
+import { useEditStore } from "./useEditStore";
 
 export const useAppStore = create((set, get) => ({
   // View & Mode State
@@ -39,7 +41,18 @@ export const useAppStore = create((set, get) => ({
   setPresetView: (view) => set({ presetView: view }),
   setPresentationMode: (val) => set({ isPresentationMode: val }),
 
-  setSelectedComponentId: (id) => set({ selectedComponentId: id }),
+  setSelectedComponentId: (id) => {
+    const edit = useEditStore.getState();
+    if (edit.isSelectionLocked()) return;
+    let next = id;
+    // While the transform tools are active, nested meshes resolve to their parent
+    // assembly so the gizmo always has a transformable target.
+    if (id && edit.editMode) {
+      const parentId = getParentComponentId(id);
+      if (parentId && parentId !== id) next = parentId;
+    }
+    set({ selectedComponentId: next });
+  },
   setHoveredComponentId: (id) => set({ hoveredComponentId: id }),
 
   setSimulationSpeed: (speed) => set({ simulationSpeed: speed }),
@@ -74,3 +87,16 @@ export const useAppStore = create((set, get) => ({
 
   setBypassOpenPercent: (val) => set({ bypassOpenPercent: val }),
 }));
+
+// When edit mode switches on, a previously selected nested sub-part (e.g. a single
+// cylinder picked while edit mode was off) resolves to its parent assembly so the
+// transform gizmo always has a valid target.
+useEditStore.subscribe((state, prev) => {
+  if (!state.editMode || prev.editMode) return;
+  const { selectedComponentId } = useAppStore.getState();
+  if (!selectedComponentId) return;
+  const parentId = getParentComponentId(selectedComponentId);
+  if (parentId && parentId !== selectedComponentId) {
+    useAppStore.getState().setSelectedComponentId(parentId);
+  }
+});

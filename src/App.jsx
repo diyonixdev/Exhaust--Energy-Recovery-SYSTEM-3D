@@ -4,6 +4,7 @@ import { MainScene } from "./components/3d/MainScene";
 import { Header } from "./components/ui/Header";
 import { ComponentCard } from "./components/ui/ComponentCard";
 import { LiveDashboard } from "./components/ui/LiveDashboard";
+import { TransformPanel } from "./components/ui/TransformPanel";
 
 export default function App() {
   return (
@@ -13,6 +14,9 @@ export default function App() {
 
       {/* Right Component Inspection & Narration Card */}
       <ComponentCard />
+
+      {/* Left Searchable Component Hierarchy & Transform Editing Panel */}
+      <TransformPanel />
 
       {/* Floating Simulation Phase Narration Banner & Speed Pace Controls */}
       <LiveDashboard />

@@ -171,4 +171,24 @@ export const COMPONENTS_DATA = {
     coreFunction: "Final atmospheric discharge path for de-energized exhaust gas stream.",
     specs: { "Exit Diameter": "170 mm", "Exhaust Temp at Exit": "180 °C" },
   },
+
+  baseplate: {
+    id: "baseplate",
+    title: "13 Mounting Baseplate",
+    category: "STRUCTURAL FOUNDATION",
+    sketchLabel: "Machined Steel Baseplate",
+    description: "Precision-machined steel baseplate carrying the complete exhaust energy recovery assembly with structural support legs and bevelled border frame.",
+    coreFunction: "Provides a rigid, vibration-damped datum surface that keeps every component on a common centreline.",
+    specs: { "Length": "28.5", "Width": "7.5", "Material": "Structural Steel S355" },
+  },
+
+  vehicleChassis: {
+    id: "vehicleChassis",
+    title: "14 Vehicle Chassis Context",
+    category: "MOUNTING CONTEXT",
+    sketchLabel: "Heavy Truck Frame",
+    description: "Wireframe heavy-duty truck chassis showing where the recovery system is installed relative to frame rails, crossmembers, dual rear wheels and cab.",
+    coreFunction: "Provides real-world packaging context for the recovery system inside the vehicle frame.",
+    specs: { "Wheelbase Context": "Dual Rear Axle", "Frame Rail Spacing": "4.4", "Render": "Wireframe Context Only" },
+  },
 };

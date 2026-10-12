@@ -19,12 +19,21 @@ import { VehicleChassis } from "./VehicleChassis";
 import { DimensionCallouts } from "./DimensionCallouts";
 import { HighlightAura } from "./HighlightAura";
 import { CameraController } from "./CameraController";
+import { EditableComponent } from "./EditableComponent";
+import { TransformEditor } from "./TransformEditor";
 import { useAppStore } from "../../store/useAppStore";
+import { useEditStore } from "../../store/useEditStore";
 
 export function MainScene() {
   const controlsRef = useRef();
   const setSelected = useAppStore((state) => state.setSelectedComponentId);
   const isTechnical = useAppStore((state) => state.isTechnicalMode);
+  const showVehicleContext = useAppStore((state) => state.showVehicleContext);
+
+  const handleBackgroundClick = () => {
+    if (useEditStore.getState().isSelectionLocked()) return;
+    setSelected(null);
+  };
 
   return (
     <>
@@ -74,27 +83,57 @@ export function MainScene() {
         color="#020617"
       />
 
-      <group onClick={() => setSelected(null)}>
-        <Baseplate />
-        <EngineModel />
-        <ExhaustPipeModel />
-        <MufflerChamberModel />
-        <NozzleModel />
-        <TurbineModel />
-        <ShaftModel />
-        <DeflectorModel />
-        <BypassValveModel />
-        <GeneratorModel />
-        <PowerElectronicsModel />
-        <BatteryModel />
-        <ExhaustOutletModel />
+      <group onClick={handleBackgroundClick} onPointerMissed={handleBackgroundClick}>
+        <EditableComponent id="baseplate">
+          <Baseplate />
+        </EditableComponent>
+        <EditableComponent id="engine">
+          <EngineModel />
+        </EditableComponent>
+        <EditableComponent id="exhaustPipe">
+          <ExhaustPipeModel />
+        </EditableComponent>
+        <EditableComponent id="mufflerChamber">
+          <MufflerChamberModel />
+        </EditableComponent>
+        <EditableComponent id="nozzle">
+          <NozzleModel />
+        </EditableComponent>
+        <EditableComponent id="turbine">
+          <TurbineModel />
+        </EditableComponent>
+        <EditableComponent id="shaft">
+          <ShaftModel />
+        </EditableComponent>
+        <EditableComponent id="deflector">
+          <DeflectorModel />
+        </EditableComponent>
+        <EditableComponent id="bypassValve">
+          <BypassValveModel />
+        </EditableComponent>
+        <EditableComponent id="generator">
+          <GeneratorModel />
+        </EditableComponent>
+        <EditableComponent id="powerElectronics">
+          <PowerElectronicsModel />
+        </EditableComponent>
+        <EditableComponent id="batteryPack">
+          <BatteryModel />
+        </EditableComponent>
+        <EditableComponent id="exhaustOutlet">
+          <ExhaustOutletModel />
+        </EditableComponent>
 
         <ExhaustParticles />
         <EnergyFlowLines />
-        <VehicleChassis />
+        <EditableComponent id="vehicleChassis" measureKey={showVehicleContext ? "on" : "off"}>
+          <VehicleChassis />
+        </EditableComponent>
         <DimensionCallouts />
         <HighlightAura />
       </group>
+
+      <TransformEditor />
     </>
   );
 }

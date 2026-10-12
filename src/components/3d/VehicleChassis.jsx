@@ -2,9 +2,9 @@ import React from "react";
 import { useAppStore } from "../../store/useAppStore";
 
 export function VehicleChassis() {
-  const isVehicleContextVisible = useAppStore((state) => state.isVehicleContextVisible);
+  const showVehicleContext = useAppStore((state) => state.showVehicleContext);
 
-  if (!isVehicleContextVisible) return null;
+  if (!showVehicleContext) return null;
 
   return (
     <group position={[0, -2.5, 0]}>

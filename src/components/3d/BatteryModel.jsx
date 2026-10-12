@@ -12,7 +12,7 @@ export function BatteryModel() {
   const viewMode = useAppStore((state) => state.viewMode);
   const isTechnical = useAppStore((state) => state.isTechnicalMode);
   const isSimulating = useAppStore((state) => state.isSimulating);
-  const batterySOC = useAppStore((state) => state.batteryChargePercent);
+  const batterySOC = useAppStore((state) => state.batteryCharge);
 
   const isSelected = selectedId === "batteryPack";
   const isHovered = hoveredId === "batteryPack";

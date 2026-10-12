@@ -1,6 +1,7 @@
 import React from "react";
 import { useAppStore } from "../../store/useAppStore";
-import { Play, Pause, Compass, Truck } from "lucide-react";
+import { useEditStore } from "../../store/useEditStore";
+import { Play, Pause, Compass, Truck, PencilRuler } from "lucide-react";
 
 export function Header() {
   const isSimulating = useAppStore((state) => state.isSimulating);
@@ -13,6 +14,9 @@ export function Header() {
   const toggleTechnicalMode = useAppStore((state) => state.toggleTechnicalMode);
   const showVehicleContext = useAppStore((state) => state.showVehicleContext);
   const toggleVehicleContext = useAppStore((state) => state.toggleVehicleContext);
+
+  const editMode = useEditStore((state) => state.editMode);
+  const toggleEditMode = useEditStore((state) => state.toggleEditMode);
 
   return (
     <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4 bg-gradient-to-b from-slate-950/80 via-slate-950/30 to-transparent backdrop-blur-md pointer-events-none">
@@ -71,6 +75,19 @@ export function Header() {
         >
           <Truck className="w-3.5 h-3.5 text-indigo-400" />
           VEHICLE VIEW
+        </button>
+
+        <button
+          onClick={toggleEditMode}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
+            editMode
+              ? "bg-amber-950/80 border-amber-500/50 text-amber-300 shadow-md"
+              : "bg-slate-900/80 border-slate-700/60 text-slate-300 hover:bg-slate-800"
+          }`}
+          title="Toggle component editing tools"
+        >
+          <PencilRuler className="w-3.5 h-3.5 text-amber-400" />
+          EDIT MODE
         </button>
       </div>
     </header>

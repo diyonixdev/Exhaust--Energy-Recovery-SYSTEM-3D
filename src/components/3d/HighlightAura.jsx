@@ -1,22 +1,32 @@
 import React, { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { SYSTEM_DIMENSIONS } from "../../data/dimensions";
+import { EDITABLE_IDS } from "../../data/editableComponents";
 import { useAppStore } from "../../store/useAppStore";
 
-export function HighlightAura() {
+export function HighlightAura({ id }) {
   const boxRef = useRef();
   const selectedId = useAppStore((state) => state.selectedComponentId);
 
+  const activeId =
+    id !== undefined
+      ? selectedId === id
+        ? id
+        : null
+      : selectedId && !EDITABLE_IDS.has(selectedId)
+        ? selectedId
+        : null;
+
   useFrame((state) => {
-    if (boxRef.current && selectedId) {
+    if (boxRef.current && activeId) {
       const pulse = Math.sin(state.clock.elapsedTime * 6) * 0.2 + 0.8;
       boxRef.current.material.opacity = pulse * 0.8;
     }
   });
 
-  if (!selectedId || !SYSTEM_DIMENSIONS[selectedId]) return null;
+  if (!activeId || !SYSTEM_DIMENSIONS[activeId]) return null;
 
-  const dim = SYSTEM_DIMENSIONS[selectedId];
+  const dim = SYSTEM_DIMENSIONS[activeId];
   let pos = [0, 0, 0];
   let size = [2, 2, 2];
 
@@ -32,14 +42,22 @@ export function HighlightAura() {
     pos = [(dim.startX + dim.endX) / 2, 0, 0];
     size = [len + 0.4, dim.radius * 2 + 0.4, dim.radius * 2 + 0.4];
   } else if (dim.inletPos) {
-    pos = dim.valveBodyPos;
-    size = [2.5, 2.5, 2.5];
+    // Bypass valve run: span the pipe from inlet to outlet and drop down to the valve body
+    const [inX, inY, inZ] = dim.inletPos;
+    const [outX, outY, outZ] = dim.outletPos || dim.inletPos;
+    pos = [(inX + outX) / 2, (inY + outY) / 2, (inZ + outZ) / 2];
+    const margin = 1.2;
+    size = [
+      Math.abs(inX - outX) + margin,
+      Math.max(Math.abs(inY - outY), dim.valveBodyPos ? Math.abs(inY - dim.valveBodyPos[1]) : 0) + margin + 0.6,
+      Math.max(Math.abs(inZ - outZ), 2.4),
+    ];
   }
 
   return (
     <group position={pos}>
       {/* Bright Pulsing Cyan 3D Bounding Box Outline */}
-      <mesh ref={boxRef}>
+      <mesh ref={boxRef} raycast={() => null}>
         <boxGeometry args={size} />
         <meshBasicMaterial color="#38bdf8" wireframe transparent opacity={0.8} />
       </mesh>

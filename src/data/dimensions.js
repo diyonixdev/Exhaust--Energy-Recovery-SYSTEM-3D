@@ -1,6 +1,16 @@
 // Centralized Engineering Dimensions Configuration
 // Extended multi-stage series turbine housing for 12 separate turbine wheels in series
 
+// 08 Bypass Valve & Pipe — shared by the "bypass" key (used by the model) and the
+// selectable component id "bypassValve" (used by highlight / camera focus).
+const BYPASS_VALVE_DIMS = {
+  inletPos: [5.8, -1.8, 0],
+  outletPos: [-4.8, -1.8, 0],
+  valveBodyPos: [-0.25, -2.6, 0],
+  pipeRadius: 0.38,
+  valveDiscRadius: 0.36,
+};
+
 export const SYSTEM_DIMENSIONS = {
   // Overall System Metrics
   overallLength: 26.5,
@@ -72,13 +82,8 @@ export const SYSTEM_DIMENSIONS = {
   },
 
   // 08 Bypass Valve & Pipe
-  bypass: {
-    inletPos: [5.8, -1.8, 0],
-    outletPos: [-4.8, -1.8, 0],
-    valveBodyPos: [-0.25, -2.6, 0],
-    pipeRadius: 0.38,
-    valveDiscRadius: 0.36,
-  },
+  bypass: BYPASS_VALVE_DIMS,
+  bypassValve: BYPASS_VALVE_DIMS,
 
   // 09 Electrical Generator
   generator: {
@@ -110,5 +115,21 @@ export const SYSTEM_DIMENSIONS = {
     position: [-4.2, 2.5, 0],
     radius: 0.85,
     length: 1.8,
+  },
+
+  // 13 Mounting Baseplate
+  baseplate: {
+    position: [1.5, -2.4, 0],
+    width: 28.5,
+    height: 0.35,
+    depth: 7.5,
+  },
+
+  // 14 Vehicle Chassis Context
+  vehicleChassis: {
+    position: [3, -0.5, 0],
+    width: 33,
+    height: 9.5,
+    depth: 6,
   },
 };

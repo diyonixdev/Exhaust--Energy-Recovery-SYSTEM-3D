@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { SIMULATION_PHASES } from "../../data/simulationPhases";
 import { SYSTEM_DIMENSIONS } from "../../data/dimensions";
 import { useAppStore } from "../../store/useAppStore";
+import { useEditStore } from "../../store/useEditStore";
 
 export function CameraController({ controlsRef }) {
   const { camera } = useThree();
@@ -17,6 +18,15 @@ export function CameraController({ controlsRef }) {
   const selectedId = useAppStore((state) => state.selectedComponentId);
   const setSelected = useAppStore((state) => state.setSelectedComponentId);
   const presetView = useAppStore((state) => state.presetView);
+  const isGizmoDragging = useEditStore((state) => state.isDragging);
+
+  // Never fly the camera while a transform gizmo drag is in progress
+  useEffect(() => {
+    if (isGizmoDragging) {
+      isTransitioning.current = false;
+    }
+  }, [isGizmoDragging]);
+
 
   // Stop camera transition when user manually interacts with mouse/touch
   useEffect(() => {
@@ -53,8 +63,15 @@ export function CameraController({ controlsRef }) {
   }, [presetView]);
 
   // Component Selection Focus Camera Transition
+  // Skipped while the transform editor is active: focusing on every selection would
+  // yank the camera away from the gizmo mid-edit.
   useEffect(() => {
-    if (!isSimulating && selectedId && SYSTEM_DIMENSIONS[selectedId]) {
+    if (
+      !isSimulating &&
+      !useEditStore.getState().editMode &&
+      selectedId &&
+      SYSTEM_DIMENSIONS[selectedId]
+    ) {
       const dim = SYSTEM_DIMENSIONS[selectedId];
       let pos = [0, 0, 0];
 
@@ -81,8 +98,11 @@ export function CameraController({ controlsRef }) {
         } else {
           setSelected(null);
         }
-        isTransitioning.current = true;
-        transitionTimer.current = 2.0;
+        // Never yank the camera away while the user is dragging a transform gizmo
+        if (!useEditStore.getState().isDragging) {
+          isTransitioning.current = true;
+          transitionTimer.current = 2.0;
+        }
       }
     }
   }, [isSimulating, currentPhaseIndex, setSelected]);
