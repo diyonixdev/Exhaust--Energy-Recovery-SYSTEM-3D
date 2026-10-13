@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -29,6 +34,13 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Verify build output
+        run: |
+          test -f dist/index.html
+          grep -Eq '/Exhaust--Energy-Recovery-SYSTEM-3D/assets/index-[^"]+\.js' dist/index.html
+          grep -Eq '/Exhaust--Energy-Recovery-SYSTEM-3D/assets/index-[^"]+\.css' dist/index.html
+          ! grep -q '/src/main.jsx' dist/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
