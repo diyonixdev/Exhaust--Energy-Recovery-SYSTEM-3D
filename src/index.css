@@ -6,6 +6,7 @@
   }
 }
 
+.app-shell { background: radial-gradient(ellipse at 50% 70%, #14242a 0%, #080d12 47%, #03070a 100%); }
 /* Custom sleek scrollbar for modals & panels */
 ::-webkit-scrollbar {
   width: 6px;

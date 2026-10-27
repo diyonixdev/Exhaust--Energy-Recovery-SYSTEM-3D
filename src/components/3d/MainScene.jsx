@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import * as THREE from "three";
 import { OrbitControls, ContactShadows } from "@react-three/drei";
 import { Baseplate } from "./Baseplate";
 import { EngineModel } from "./EngineModel";
@@ -21,6 +22,7 @@ import { HighlightAura } from "./HighlightAura";
 import { CameraController } from "./CameraController";
 import { EditableComponent } from "./EditableComponent";
 import { TransformEditor } from "./TransformEditor";
+import { TelemetryDashboard } from "./TelemetryDashboard";
 import { useAppStore } from "../../store/useAppStore";
 import { useEditStore } from "../../store/useEditStore";
 
@@ -31,6 +33,7 @@ export function MainScene() {
   const showVehicleContext = useAppStore((state) => state.showVehicleContext);
 
   const handleBackgroundClick = () => {
+    if (useAppStore.getState().isOrbiting) return;
     if (useEditStore.getState().isSelectionLocked()) return;
     setSelected(null);
   };
@@ -41,17 +44,29 @@ export function MainScene() {
         ref={controlsRef}
         makeDefault
         enableDamping
-        dampingFactor={0.08}
-        minDistance={0.5}
-        maxDistance={120}
-        minPolarAngle={0}
-        maxPolarAngle={Math.PI}
-        rotateSpeed={0.9}
+        dampingFactor={0.07}
+        minDistance={5}
+        maxDistance={55}
+        minPolarAngle={Math.PI * 0.05}
+        maxPolarAngle={Math.PI * 0.495}
+        rotateSpeed={0.85}
         zoomSpeed={1.2}
-        panSpeed={0.9}
+        panSpeed={0.8}
         enablePan={true}
         enableZoom={true}
         enableRotate={true}
+        touches={{
+          ONE: THREE.TOUCH.ROTATE,
+          TWO: THREE.TOUCH.DOLLY_PAN,
+        }}
+        onStart={() => {
+          useAppStore.getState().setIsOrbiting(true);
+        }}
+        onEnd={() => {
+          setTimeout(() => {
+            useAppStore.getState().setIsOrbiting(false);
+          }, 100);
+        }}
       />
 
       <CameraController controlsRef={controlsRef} />
@@ -83,6 +98,7 @@ export function MainScene() {
         color="#020617"
       />
 
+      {/* Shared vehicle assembly parent: vehicle parts, telemetry board, and leads inherit the same transform. */}
       <group onClick={handleBackgroundClick} onPointerMissed={handleBackgroundClick}>
         <EditableComponent id="baseplate">
           <Baseplate />
@@ -131,6 +147,7 @@ export function MainScene() {
         </EditableComponent>
         <DimensionCallouts />
         <HighlightAura />
+        <TelemetryDashboard />
       </group>
 
       <TransformEditor />

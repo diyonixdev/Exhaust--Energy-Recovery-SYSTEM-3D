@@ -77,6 +77,7 @@ export function EditableComponent({ id, measureKey, children }) {
 
   const handleClick = (event) => {
     event.stopPropagation();
+    if (useAppStore.getState().isOrbiting) return;
     if (useEditStore.getState().isClickSuppressed()) return;
     setSelected(id);
   };

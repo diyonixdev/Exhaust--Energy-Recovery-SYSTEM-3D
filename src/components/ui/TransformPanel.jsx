@@ -145,7 +145,7 @@ export function TransformPanel() {
   const linkScale = useEditStore((state) => state.linkScale);
   const toggleLinkScale = useEditStore((state) => state.toggleLinkScale);
 
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState(() => new Set());
   const [confirmState, setConfirmState] = useState(null);
@@ -432,7 +432,7 @@ export function TransformPanel() {
       <button
         type="button"
         onClick={() => setCollapsed(false)}
-        className="absolute top-20 left-6 z-30 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/95 border border-cyan-500/50 text-cyan-300 font-mono text-[10px] font-bold uppercase tracking-wider shadow-xl backdrop-blur-xl hover:bg-slate-800 transition-all pointer-events-auto"
+        className="absolute top-20 left-6 max-md:top-auto max-md:bottom-6 max-md:left-4 z-30 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/95 border border-cyan-500/50 text-cyan-300 font-mono text-[10px] font-bold uppercase tracking-wider shadow-xl backdrop-blur-xl hover:bg-slate-800 transition-all pointer-events-auto"
       >
         <PencilRuler className="w-3.5 h-3.5" />
         Components
@@ -441,7 +441,7 @@ export function TransformPanel() {
   }
 
   return (
-    <div className="absolute top-20 left-6 z-30 w-[300px] max-h-[calc(100vh-7rem)] flex flex-col rounded-2xl bg-slate-900/95 border border-cyan-500/50 shadow-2xl backdrop-blur-xl pointer-events-auto font-mono">
+    <div className="absolute top-20 left-6 max-md:top-auto max-md:bottom-16 max-md:left-3 z-30 w-[300px] max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-8rem)] flex flex-col rounded-2xl bg-slate-900/95 border border-cyan-500/50 shadow-2xl backdrop-blur-xl pointer-events-auto font-mono">
       {/* Panel Header */}
       <div className="flex items-center justify-between px-3.5 pt-3 pb-2 border-b border-slate-800">
         <div className="flex items-center gap-1.5">

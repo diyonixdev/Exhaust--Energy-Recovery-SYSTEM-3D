@@ -13,6 +13,18 @@ export const useAppStore = create((set, get) => ({
   presetView: "isometric",
   isPresentationMode: false,
 
+  // Camera & Interaction State
+  isOrbiting: false,
+  cameraAction: null,
+  setIsOrbiting: (val) => set({ isOrbiting: val }),
+  triggerZoomIn: () => set({ cameraAction: { type: "ZOOM_IN", id: Date.now() + Math.random() } }),
+  triggerZoomOut: () => set({ cameraAction: { type: "ZOOM_OUT", id: Date.now() + Math.random() } }),
+  resetCameraView: () => set({
+    cameraAction: { type: "RESET", id: Date.now() + Math.random() },
+    selectedComponentId: null,
+    presetView: "isometric"
+  }),
+
   // Interactive Component Selection
   selectedComponentId: null,
   hoveredComponentId: null,

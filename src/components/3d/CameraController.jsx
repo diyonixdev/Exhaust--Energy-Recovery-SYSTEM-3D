@@ -6,10 +6,13 @@ import { SYSTEM_DIMENSIONS } from "../../data/dimensions";
 import { useAppStore } from "../../store/useAppStore";
 import { useEditStore } from "../../store/useEditStore";
 
+export const DEFAULT_CAM_POS = new THREE.Vector3(4.0, 7.5, 25.5);
+export const DEFAULT_LOOK_AT = new THREE.Vector3(1.5, -0.4, 0);
+
 export function CameraController({ controlsRef }) {
   const { camera } = useThree();
-  const targetCamPos = useRef(new THREE.Vector3(18, 10, 24));
-  const targetLookAt = useRef(new THREE.Vector3(1.5, 0, 0));
+  const targetCamPos = useRef(DEFAULT_CAM_POS.clone());
+  const targetLookAt = useRef(DEFAULT_LOOK_AT.clone());
   const isTransitioning = useRef(false);
   const transitionTimer = useRef(0);
 
@@ -18,6 +21,7 @@ export function CameraController({ controlsRef }) {
   const selectedId = useAppStore((state) => state.selectedComponentId);
   const setSelected = useAppStore((state) => state.setSelectedComponentId);
   const presetView = useAppStore((state) => state.presetView);
+  const cameraAction = useAppStore((state) => state.cameraAction);
   const isGizmoDragging = useEditStore((state) => state.isDragging);
 
   // Never fly the camera while a transform gizmo drag is in progress
@@ -27,44 +31,89 @@ export function CameraController({ controlsRef }) {
     }
   }, [isGizmoDragging]);
 
-
-  // Stop camera transition when user manually interacts with mouse/touch
+  // Handle Zoom In, Zoom Out, and Reset View camera actions from Viewport Controls
   useEffect(() => {
+    if (!cameraAction) return;
     const controls = controlsRef.current;
     if (!controls) return;
 
+    if (cameraAction.type === "ZOOM_IN") {
+      const dir = new THREE.Vector3().subVectors(controls.target, camera.position);
+      const currentDist = dir.length();
+      const minDist = controls.minDistance || 5.0;
+      if (currentDist > minDist + 0.4) {
+        const step = Math.min(currentDist - minDist, Math.max(2.5, currentDist * 0.22));
+        targetCamPos.current.copy(camera.position).addScaledVector(dir.normalize(), step);
+        targetLookAt.current.copy(controls.target);
+        isTransitioning.current = true;
+        transitionTimer.current = 0.4;
+      }
+    } else if (cameraAction.type === "ZOOM_OUT") {
+      const dir = new THREE.Vector3().subVectors(camera.position, controls.target);
+      const currentDist = dir.length();
+      const maxDist = controls.maxDistance || 55.0;
+      if (currentDist < maxDist - 0.4) {
+        const step = Math.min(maxDist - currentDist, Math.max(3.0, currentDist * 0.25));
+        targetCamPos.current.copy(camera.position).addScaledVector(dir.normalize(), step);
+        targetLookAt.current.copy(controls.target);
+        isTransitioning.current = true;
+        transitionTimer.current = 0.4;
+      }
+    } else if (cameraAction.type === "RESET") {
+      targetCamPos.current.copy(DEFAULT_CAM_POS);
+      targetLookAt.current.copy(DEFAULT_LOOK_AT);
+      isTransitioning.current = true;
+      transitionTimer.current = 1.0;
+    }
+  }, [cameraAction, controlsRef, camera]);
+
+  // Stop camera transition when user manually interacts with mouse/touch
+  useEffect(() => {
     const handleStart = () => {
       isTransitioning.current = false;
     };
 
-    controls.addEventListener("start", handleStart);
+    let controls = controlsRef.current;
+    if (controls) {
+      controls.addEventListener("start", handleStart);
+      return () => controls.removeEventListener("start", handleStart);
+    }
+
+    // If controlsRef was not ready on first mount, attach as soon as available
+    const checkInterval = setInterval(() => {
+      if (controlsRef.current) {
+        controls = controlsRef.current;
+        controls.addEventListener("start", handleStart);
+        clearInterval(checkInterval);
+      }
+    }, 50);
+
     return () => {
-      controls.removeEventListener("start", handleStart);
+      clearInterval(checkInterval);
+      if (controls) controls.removeEventListener("start", handleStart);
     };
   }, [controlsRef]);
 
   // Preset Views Smooth Camera Transition
   useEffect(() => {
     if (presetView === "isometric") {
-      targetCamPos.current.set(18, 10, 24);
-      targetLookAt.current.set(1.5, 0, 0);
+      targetCamPos.current.copy(DEFAULT_CAM_POS);
+      targetLookAt.current.copy(DEFAULT_LOOK_AT);
     } else if (presetView === "front") {
-      targetCamPos.current.set(1.5, 0, 26);
-      targetLookAt.current.set(1.5, 0, 0);
+      targetCamPos.current.set(1.5, 0, 24);
+      targetLookAt.current.copy(DEFAULT_LOOK_AT);
     } else if (presetView === "side") {
       targetCamPos.current.set(28, 0, 0);
-      targetLookAt.current.set(1.5, 0, 0);
+      targetLookAt.current.copy(DEFAULT_LOOK_AT);
     } else if (presetView === "top") {
       targetCamPos.current.set(1.5, 28, 0.01);
-      targetLookAt.current.set(1.5, 0, 0);
+      targetLookAt.current.copy(DEFAULT_LOOK_AT);
     }
     isTransitioning.current = true;
-    transitionTimer.current = 1.5;
+    transitionTimer.current = 1.2;
   }, [presetView]);
 
   // Component Selection Focus Camera Transition
-  // Skipped while the transform editor is active: focusing on every selection would
-  // yank the camera away from the gizmo mid-edit.
   useEffect(() => {
     if (
       !isSimulating &&
@@ -82,7 +131,7 @@ export function CameraController({ controlsRef }) {
       targetCamPos.current.set(pos[0] + 4.5, pos[1] + 3.0, pos[2] + 8.0);
       targetLookAt.current.set(pos[0], pos[1], pos[2]);
       isTransitioning.current = true;
-      transitionTimer.current = 1.5;
+      transitionTimer.current = 1.2;
     }
   }, [selectedId, isSimulating]);
 
@@ -98,10 +147,9 @@ export function CameraController({ controlsRef }) {
         } else {
           setSelected(null);
         }
-        // Never yank the camera away while the user is dragging a transform gizmo
         if (!useEditStore.getState().isDragging) {
           isTransitioning.current = true;
-          transitionTimer.current = 2.0;
+          transitionTimer.current = 1.8;
         }
       }
     }
@@ -113,11 +161,15 @@ export function CameraController({ controlsRef }) {
       transitionTimer.current -= delta;
       if (transitionTimer.current <= 0) {
         isTransitioning.current = false;
+        camera.position.copy(targetCamPos.current);
+        controlsRef.current.target.copy(targetLookAt.current);
+        controlsRef.current.update();
         return;
       }
 
-      camera.position.lerp(targetCamPos.current, 3.5 * delta);
-      controlsRef.current.target.lerp(targetLookAt.current, 3.5 * delta);
+      const factor = Math.min(1.0, 5.0 * delta);
+      camera.position.lerp(targetCamPos.current, factor);
+      controlsRef.current.target.lerp(targetLookAt.current, factor);
       controlsRef.current.update();
     }
   });
