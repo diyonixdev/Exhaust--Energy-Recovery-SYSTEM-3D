@@ -6,17 +6,20 @@ import { useEditStore } from "../../store/useEditStore";
 
 const WIDTH = 25.6;
 const HEIGHT = 6.25;
-const BOARD_CENTER = [4.3, 5.95, 0.45];
+// Vertical lift keeps the board clear of the engine, power electronics, and battery.
+const BOARD_LIFT = 2.0;
+const BOARD_CENTER = [4.3, 7.85 + BOARD_LIFT, 0.45];
 const MIC_CANVAS_POSITION = [818, 66];
 const MIC_WORLD_POSITION = [
   BOARD_CENTER[0] + (MIC_CANVAS_POSITION[0] / 1536 - 0.5) * WIDTH,
   BOARD_CENTER[1] + (0.5 - MIC_CANVAS_POSITION[1] / 376) * HEIGHT,
 ];
+const BOARD_SOCKET_Y = 5.9 + BOARD_LIFT;
 const BOARD_SOCKETS = [
-  [14.4, 4.0, 0.62],
-  [7.6, 4.0, 0.62],
-  [1.0, 4.0, 0.62],
-  [-5.8, 4.0, 0.62],
+  [14.4, BOARD_SOCKET_Y, 0.62],
+  [7.6, BOARD_SOCKET_Y, 0.62],
+  [1.0, BOARD_SOCKET_Y, 0.62],
+  [-5.8, BOARD_SOCKET_Y, 0.62],
 ];
 const TELEMETRY = [
   { key: "engineRPM", label: "ENGINE RPM", unit: "RPM", initial: 2450, color: "#30f5ba", max: 6000 },
@@ -339,8 +342,8 @@ export function TelemetryDashboard() {
     const end = new THREE.Vector3(...BOARD_SOCKETS[index]);
     const curve = new THREE.CubicBezierCurve3(
       start,
-      new THREE.Vector3(start.x, start.y + 2.1, start.z + 0.55),
-      new THREE.Vector3(end.x, end.y - 1.15, end.z + 0.15),
+      new THREE.Vector3(start.x, start.y + 3.4, start.z + 0.75),
+      new THREE.Vector3(end.x, end.y - 1.9, end.z + 0.2),
       end,
     );
     return { curve, color: TELEMETRY[index].color };

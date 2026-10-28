@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import * as THREE from "three";
-import { OrbitControls, ContactShadows } from "@react-three/drei";
+import { ContactShadows } from "@react-three/drei";
+import { FreeOrbitControls } from "./FreeOrbitControls";
 import { Baseplate } from "./Baseplate";
 import { EngineModel } from "./EngineModel";
 import { ExhaustPipeModel } from "./ExhaustPipeModel";
@@ -40,15 +41,13 @@ export function MainScene() {
 
   return (
     <>
-      <OrbitControls
+      <FreeOrbitControls
         ref={controlsRef}
         makeDefault
         enableDamping
         dampingFactor={0.07}
         minDistance={5}
         maxDistance={55}
-        minPolarAngle={Math.PI * 0.05}
-        maxPolarAngle={Math.PI * 0.495}
         rotateSpeed={0.85}
         zoomSpeed={1.2}
         panSpeed={0.8}
